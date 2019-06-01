@@ -1,10 +1,10 @@
 
 __world__ = {}
-objAnim = {}
-objAnim.__index = objAnim
+easyAnim = {}
+easyAnim.__index = easyAnim
 
-function objAnim.new(sprites)
-    local self = setmetatable({}, objAnim)
+function easyAnim.new(sprites)
+    local self = setmetatable({}, easyAnim)
     
     -- main attributes
     self.x = 0
@@ -51,7 +51,7 @@ function objAnim.new(sprites)
     return self
 end
 
-function objAnim.createAnim(self, sprite_id, rows, cols, last_sprite, frameRate, isLoop, static)
+function easyAnim.createAnim(self, sprite_id, rows, cols, last_sprite, frameRate, isLoop, static)
     local image = love.graphics.newImage(self.list_images_sheets[sprite_id])
     local sprites_arr = {}
     sprites_arr[0] = image
@@ -93,7 +93,7 @@ function objAnim.createAnim(self, sprite_id, rows, cols, last_sprite, frameRate,
     self.h = qY
 end
 
-function objAnim.update(self, dt)
+function easyAnim.update(self, dt)
 
     if (self.current_animation.endLoop == false) then
         self.current_animation.currentFrame = self.current_animation.currentFrame + (self.current_animation.frameRate * dt)
@@ -125,7 +125,7 @@ function objAnim.update(self, dt)
 
 end
 
-function objAnim.anim(self)
+function easyAnim.anim(self)
 
     if(self.current_animation.currentFrame > self.current_animation.last_spt + 1) then
         self.current_animation.currentFrame = 1
@@ -147,12 +147,12 @@ function objAnim.anim(self)
 
 end
 
-function objAnim.setCurrentAnimation(self, index)
+function easyAnim.setCurrentAnimation(self, index)
     self.index_animation = index
     self.current_animation = self.list_animations_data[index]
 end
 
-function objAnim.setPhysics(self, world, mass, phySpeed)
+function easyAnim.setPhysics(self, world, mass, phySpeed)
     self.physic.body = love.physics.newBody(world, self.x, self.y, "dynamic")
     self.physic.body:setMass(mass)
     self.physic.shape = love.physics.newRectangleShape(self.width / 2, self.height / 2)
@@ -162,7 +162,7 @@ function objAnim.setPhysics(self, world, mass, phySpeed)
     self.phySpeed = phySpeed
 end
 
-function objAnim.setPosX(self, x)
+function easyAnim.setPosX(self, x)
     if (self.physic.body) then
         self.physic.body:setX(self.physic.body:getX() + (self.width / 2))
     else
@@ -171,7 +171,7 @@ function objAnim.setPosX(self, x)
     end
 end
 
-function objAnim.setPosY(self, y)
+function easyAnim.setPosY(self, y)
     if (self.physic.body) then
         self.physic.body:setY(self.physic.body:getY() - (self.height / 2))
     else
@@ -180,15 +180,15 @@ function objAnim.setPosY(self, y)
     end    
 end
 
-function objAnim.getPosX(self)
+function easyAnim.getPosX(self)
     return self.x - (self.width / 2)
 end
 
-function objAnim.getPosY(self)
+function easyAnim.getPosY(self)
     return self.y + (self.height / 2)
 end
 
-function objAnim.setPosXY(self, x, y)
+function easyAnim.setPosXY(self, x, y)
     if (self.physic.body) then
         self.physic.body:setX(self.physic.body:getX() + (self.width / 2))
         self.physic.body:setY(self.physic.body:getY() - (self.height / 2))
@@ -200,60 +200,60 @@ function objAnim.setPosXY(self, x, y)
     end
 end
 
-function objAnim.getPosXY(self)
+function easyAnim.getPosXY(self)
     return {self.x - (self.width / 2), self.y + (self.height / 2)}
 end
 
-function objAnim.setDirection(self, direction)
+function easyAnim.setDirection(self, direction)
     self.direction = direction
 end
 
-function objAnim.getDirection(self)
+function easyAnim.getDirection(self)
     return self.direction
 end
 
-function objAnim.setRotation(self, rotation)
+function easyAnim.setRotation(self, rotation)
     self.rotation = rotation
 end
 
-function objAnim.getRotation(self)
+function easyAnim.getRotation(self)
     return self.rotation
 end
 
-function objAnim.setScaleW(self, scaleW)
+function easyAnim.setScaleW(self, scaleW)
     self.scaleW = scaleW
     self.width = scaleW * self.w
 end
 
-function objAnim.getScaleW(self)
+function easyAnim.getScaleW(self)
     return self.scaleW
 end
 
-function objAnim.setScaleH(self, scaleH)
+function easyAnim.setScaleH(self, scaleH)
     self.scaleH = scaleH
     self.height = scaleH * self.h
 end
 
-function objAnim.setScaleWH(self, scaleW, scaleH)
+function easyAnim.setScaleWH(self, scaleW, scaleH)
     self.scaleW = scaleW
     self.width = scaleW * self.w
     self.scaleH = scaleH
     self.height = scaleH * self.h
 end
 
-function objAnim.getScaleH(self)
+function easyAnim.getScaleH(self)
     return self.scaleH
 end
 
-function objAnim.getWidth(self)
+function easyAnim.getWidth(self)
     return self.width
 end
 
-function objAnim.getHeight(self)
+function easyAnim.getHeight(self)
     return self.height
 end
 
-function objAnim.activeInput(self, up, down, left, right)
+function easyAnim.activeInput(self, up, down, left, right)
     self.activeInputs = true
     self.up = up
     self.down = down
@@ -261,11 +261,11 @@ function objAnim.activeInput(self, up, down, left, right)
     self.right = right    
 end
 
-function objAnim.setPhySpeed(self, phySpeed)
+function easyAnim.setPhySpeed(self, phySpeed)
     self.phySpeed = phySpeed
 end
 
-function objAnim.setPlatformOrPhysic(self, platformOrPhysic)
+function easyAnim.setPlatformOrPhysic(self, platformOrPhysic)
     self.isPlatformOrPhysic = platformOrPhysic
 end
 
@@ -286,7 +286,7 @@ function physicsInputs(self)
     end
 end
 
-function objAnim.setPlatformValues(self, speed, gravity, mass)
+function easyAnim.setPlatformValues(self, speed, gravity, mass)
     self.speed = speed
     self.gravity = gravity
     self.mass = mass
@@ -306,7 +306,7 @@ function platformInputs(self, dt)
 
 end
 
-function objAnim.getState(self)
+function easyAnim.getState(self)
     return self.state
 end
 

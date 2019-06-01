@@ -1,9 +1,9 @@
 
-require 'lib/obj_anim'
+require 'lib/easy_anim'
 
 function love.load()
 
-  naruto = objAnim.new({"res/spt_naruto_parado.png", "res/spt_naruto_correndo.png", 
+  naruto = easyAnim.new({"res/spt_naruto_parado.png", "res/spt_naruto_correndo.png", 
                         "res/spt_naruto_pulando.png", "res/spt_naruto_caindo.png"}) --passa tabela com as sheets das sprites
   naruto:createAnim(1, 3, 2, 6, 8, true, false) -- qual sheet, qtd linhas, qtd colunas, index do ultimo sprite, frame rate, se fica em loop, se é uma imagem statica
   naruto:createAnim(2, 3, 2, 6, 12, true, false)
