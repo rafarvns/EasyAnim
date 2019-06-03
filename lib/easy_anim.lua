@@ -28,7 +28,9 @@ function easyAnim.new(sprites)
     self.state = "stand"
     self.lastX = 0
     self.lastY = 0
-    self.indexWorld = 0 
+    self.indexWorld = 0
+    self.percentW = 1
+    self.percentH = 1
 
     --PHYSICS attributes
     self.phySpeed = 0
@@ -306,6 +308,12 @@ function platformInputs(self, dt)
 
 end
 
+
+function easyAnim.setPercentHitBox(self, percentW, percentH)
+    self.percentW = percentH
+    self.percentH = percentH
+end
+
 function easyAnim.getState(self)
     return self.state
 end
@@ -334,6 +342,26 @@ end
 
 function checkCollision(self)
     if self then
-        local w = __world__[self.indexWorld]
+        me = __world__[self.indexWorld]
+        for i, obj in ipairs(__world__) do
+            if i ~= me.indexWorld then
+
+                if isCollide(me.x - (me.width / 2), me.y - (me.height / 2), me.width / self.percentW, me.height / self.percentH, 
+                                obj.x - (obj.width / 2), obj.y - (obj.height / 2), obj.width / obj.percentW, obj.height / obj.percentH) then
+                    print('true' .. me.indexWorld)
+                else
+                    print(' ')
+                end
+                
+            end
+        end
     end    
 end
+
+function isCollide(x1,y1,w1,h1, x2,y2,w2,h2)
+    return x1 < x2+w2 and
+           x2 < x1+w1 and
+           y1 < y2+h2 and
+           y2 < y1+h1
+  end
+
