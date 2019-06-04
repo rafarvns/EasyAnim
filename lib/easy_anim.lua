@@ -16,21 +16,28 @@ function easyAnim.new(sprites)
     self.direction = 1
     self.rotation = 0
     self.scaleW = 1
-    self.scaleH = 1  
+    self.scaleH = 1
+    self.isEndAnimation = false  
+    self.name = "x" .. love.math.random() +1 .. "xx"
 
     self.isPlatformOrPhysic = "platform"
 
     --PLATFORM PLATFORM ATTRIBUTES
     self.speed = 0
     self.gravity = 0
-    self.mass = 0
+    self.mass = 100
     self.massInc = 0
     self.state = "stand"
     self.lastX = 0
     self.lastY = 0
     self.indexWorld = 0
     self.percentW = 1
-    self.percentH = 1
+    self.percentH = 1   
+
+    --collisions attributes
+    self.collisionType = "none"
+    self.whoCollide = ""
+    self.isEnemy = false
 
     --PHYSICS attributes
     self.phySpeed = 0
@@ -53,7 +60,7 @@ function easyAnim.new(sprites)
     return self
 end
 
-function easyAnim.createAnim(self, sprite_id, rows, cols, last_sprite, frameRate, isLoop, static)
+function easyAnim.createAnim(self, sprite_id, rows, cols, last_sprite, frameRate, mov_speed, isLoop, static)
     local image = love.graphics.newImage(self.list_images_sheets[sprite_id])
     local sprites_arr = {}
     sprites_arr[0] = image
@@ -80,12 +87,14 @@ function easyAnim.createAnim(self, sprite_id, rows, cols, last_sprite, frameRate
         last_spt = nil,
         isLoop = nil,
         currentFrame = 1,
-        endLoop = false
+        endLoop = false,
+        speed = 0
     }    
 
     animation_data.frames = sprites_arr
     animation_data.frameRate = frameRate
     animation_data.last_spt = last_sprite
+    animation_data.speed = mov_speed
     animation_data.isLoop = isLoop
     animation_data.endLoop = static
     table.insert(self.list_animations_data, animation_data)
@@ -99,8 +108,10 @@ function easyAnim.update(self, dt)
 
     if (self.current_animation.endLoop == false) then
         self.current_animation.currentFrame = self.current_animation.currentFrame + (self.current_animation.frameRate * dt)
+        self.isEndAnimation = false
     else
         self.current_animation.currentFrame = 1
+        self.isEndAnimation = true        
     end
 
     
@@ -110,19 +121,30 @@ function easyAnim.update(self, dt)
         self.x = self.physic.body:getX()
         self.y = self.physic.body:getY()
 
-    elseif (self.isPlatformOrPhysic == "platform") then
-
-        checkCollision(self)
-    
+    elseif (self.isPlatformOrPhysic == "platform") then           
+        self.collisionType = "none"
         platformInputs(self, dt)
-        
-        --gravity
-        if(self.massInc < self.mass) then
-            self.massInc = self.massInc + dt * self.gravity * self.mass
-        end
-        self.y = self.y + dt * self.gravity * self.massInc
 
-        updateState(self)        
+        if self.state ~= "jumping" then
+            if(self.massInc < self.mass) then
+                self.massInc = self.massInc + dt * self.gravity * self.mass
+            end
+            if not checkCollision(self, self.x, self.y + dt * self.gravity * self.massInc) then
+                self.y = self.y + dt * self.gravity * self.massInc
+            else
+                self.collisionType = self.whoCollide .. "ground"
+            end
+        else
+            self.massInc = self.massInc - dt * ((self.gravity * self.mass) / 4)
+            if not checkCollision(self, self.x, self.y - dt * self.gravity * self.massInc) then
+                self.y = self.y - dt * self.gravity * self.massInc
+            else
+                self.collisionType = self.whoCollide .. "head"
+            end
+        end
+        
+        updateState(self)
+        
     end
 
 end
@@ -132,7 +154,7 @@ function easyAnim.anim(self)
     if(self.current_animation.currentFrame > self.current_animation.last_spt + 1) then
         self.current_animation.currentFrame = 1
         if(self.current_animation.isLoop == false)then
-            self.current_animation.endLoop = true
+            self.current_animation.endLoop = true            
         end 
     end
 
@@ -152,6 +174,12 @@ end
 function easyAnim.setCurrentAnimation(self, index)
     self.index_animation = index
     self.current_animation = self.list_animations_data[index]
+    self.speed = self.current_animation.speed
+    self.current_animation.endLoop = false
+end
+
+function easyAnim.getCurrentAnimation(self)
+    return self.index_animation
 end
 
 function easyAnim.setPhysics(self, world, mass, phySpeed)
@@ -267,8 +295,28 @@ function easyAnim.setPhySpeed(self, phySpeed)
     self.phySpeed = phySpeed
 end
 
+function easyAnim.isEnemy(self, isEnemy)
+    self.isEnemy = isEnemy
+end
+
+function easyAnim.getCollisionType(self)
+    return self.collisionType
+end
+
 function easyAnim.setPlatformOrPhysic(self, platformOrPhysic)
     self.isPlatformOrPhysic = platformOrPhysic
+end
+
+function easyAnim.setName(self, name)
+    self.name = name
+end
+
+function easyAnim.getName(self)
+    return self.name
+end
+
+function easyAnim.getEndAnimation(self)
+    return self.isEndAnimation
 end
 
 function physicsInputs(self)
@@ -288,22 +336,48 @@ function physicsInputs(self)
     end
 end
 
-function easyAnim.setPlatformValues(self, speed, gravity, mass)
-    self.speed = speed
+function easyAnim.setGravity(self, gravity)
     self.gravity = gravity
-    self.mass = mass
 end
 
 function platformInputs(self, dt)
 
     if(self.activeInputs and self.isPlatformOrPhysic == "platform") then
+        local movSpeed = 1
+        if self.state == "jumping" or self.state == "falling" then
+            movSpeed = 1    
+        end
+
+        if love.keyboard.isDown(self.jump) and (self.state == "standing" or self.state == "moving") then
+            self.state = "jumping"
+        end
+
         if love.keyboard.isDown(self.right) then
-            self.direction = 1
-            self.x = self.x + dt * self.speed    
+            self.direction = 1            
+            if not checkCollision(self, self.x + dt * self.speed / movSpeed, self.y) then
+                self.x = self.x + dt * self.speed / movSpeed
+            else
+                local enemy = ""
+                if self.isEnemy then
+                    enemy = "-enemy"
+                end
+                self.collisionType = self.whoCollide .. "right-side"
+            end
         elseif love.keyboard.isDown(self.left) then
             self.direction = -1
-            self.x = self.x - dt * self.speed
+            if not checkCollision(self, self.x - dt * self.speed / movSpeed, self.y) then
+                self.x = self.x - dt * self.speed / movSpeed
+            else
+                local enemy = ""
+                if self.isEnemy then
+                    enemy = "-enemy"
+                end
+                self.collisionType = self.whoCollide .. "left-side"
+            end
         end
+
+
+
     end
 
 end
@@ -323,7 +397,7 @@ function updateState(self)
         if self.lastY < self.y then
             self.state = "falling"
         elseif self.lastY > self.y then
-            self.stand = "jumping"
+            self.state = "jumping" 
         elseif self.lastX == self.x then
             self.state = "standing"  
         elseif self.lastX > self.x or self.lastX < self.x then
@@ -340,28 +414,37 @@ function addObjectInWorld(object)
     object.indexWorld = table.getn(__world__)
 end
 
-function checkCollision(self)
+function checkCollision(self, px, py)
     if self then
-        me = __world__[self.indexWorld]
+        local me = {
+            x = px,
+            y = py,
+            width = self.width,
+            height = self.height
+        }
         for i, obj in ipairs(__world__) do
-            if i ~= me.indexWorld then
-
-                if isCollide(me.x - (me.width / 2), me.y - (me.height / 2), me.width / self.percentW, me.height / self.percentH, 
+            if i ~= self.indexWorld then
+                if collide(me.x - (me.width / 2), me.y - (me.height / 2), me.width / self.percentW, me.height / self.percentH, 
                                 obj.x - (obj.width / 2), obj.y - (obj.height / 2), obj.width / obj.percentW, obj.height / obj.percentH) then
-                    print('true' .. me.indexWorld)
-                else
-                    print(' ')
+                    local enemy = ""
+                    if obj.isEnemy then
+                        enemy = "enemy-"
+                    end
+                    enemy = enemy .. obj.name .. "-"
+                    self.whoCollide = enemy
+                    return true
                 end
-                
             end
         end
     end    
+    self.whoCollide = ""
+    return false
 end
 
-function isCollide(x1,y1,w1,h1, x2,y2,w2,h2)
+function collide(x1, y1, w1, h1, x2, y2, w2, h2)
     return x1 < x2+w2 and
            x2 < x1+w1 and
            y1 < y2+h2 and
            y2 < y1+h1
-  end
+end
 
