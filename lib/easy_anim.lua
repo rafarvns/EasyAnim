@@ -17,7 +17,6 @@ function easyAnim.new(sprites)
     self.rotation = 0
     self.scaleW = 1
     self.scaleH = 1
-    self.isEndAnimation = false  
     self.name = "x" .. love.math.random() +1 .. "xx"
 
     self.isPlatformOrPhysic = "platform"
@@ -108,10 +107,8 @@ function easyAnim.update(self, dt)
 
     if (self.current_animation.endLoop == false) then
         self.current_animation.currentFrame = self.current_animation.currentFrame + (self.current_animation.frameRate * dt)
-        self.isEndAnimation = false
     else
-        self.current_animation.currentFrame = 1
-        self.isEndAnimation = true        
+        self.current_animation.currentFrame = 1    
     end
 
     
@@ -169,6 +166,15 @@ function easyAnim.anim(self)
     end
     
 
+end
+
+function easyAnim.reAnim(self)
+    self.current_animation.currentFrame = 1
+    self.current_animation.endLoop = false
+end
+
+function easyAnim.isEndAnim(self)
+    return self.current_animation.endLoop
 end
 
 function easyAnim.setCurrentAnimation(self, index)
@@ -283,12 +289,13 @@ function easyAnim.getHeight(self)
     return self.height
 end
 
-function easyAnim.activeInput(self, up, down, left, right)
+function easyAnim.activeInput(self, up, down, left, right, jump)
     self.activeInputs = true
     self.up = up
     self.down = down
     self.left = left
     self.right = right    
+    self.jump = jump
 end
 
 function easyAnim.setPhySpeed(self, phySpeed)
@@ -313,10 +320,6 @@ end
 
 function easyAnim.getName(self)
     return self.name
-end
-
-function easyAnim.getEndAnimation(self)
-    return self.isEndAnimation
 end
 
 function physicsInputs(self)
