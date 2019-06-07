@@ -364,7 +364,7 @@ function platformInputs(self, dt)
                 if self.isEnemy then
                     enemy = "-enemy"
                 end
-                self.collisionType = self.whoCollide .. "right-side"
+                self.collisionType = self.whoCollide .. "rightside"
             end
         elseif love.keyboard.isDown(self.left) then
             self.direction = -1
@@ -375,7 +375,7 @@ function platformInputs(self, dt)
                 if self.isEnemy then
                     enemy = "-enemy"
                 end
-                self.collisionType = self.whoCollide .. "left-side"
+                self.collisionType = self.whoCollide .. "leftside"
             end
         end
 

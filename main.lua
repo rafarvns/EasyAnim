@@ -32,7 +32,7 @@ function love.load()
   naruto:activeInput("up", "down", "left", "right", "up") -- seta os inputes basicos
   naruto:setPlatformOrPhysic("platform") -- seta a forma em que o objeto vai ser comportar (modo jogo plataforma 2d, ou modo jogo com aplicação de física)
   naruto:setGravity(10) -- seta a velocidade, gravidade e a massa do objeto em jogo de plataforma
-  naruto:setPercentHitBox(1.6, 1.6)
+  naruto:setPercentHitBox(4, 1.6)
   naruto:setName("narutinho")
   addObjectInWorld(naruto) -- adiciona o objeto no mundo para aplicar colisões (todos os objetos adicionados ao mundo, irão colidir)
   inThrow = false
@@ -50,7 +50,7 @@ function love.load()
   naruto2:setDirection(-1) -- especifica a direção da imagem onde 1 = normal, -1 = espelhada
   naruto2:setScaleWH(1, 1) -- seta o tamanho da imagem tanto pra width quanto pra height onde 1 = tamanho original em pixels
   naruto2:setPosXY(300, 180) -- seta a posicao de x e y da imagem
-  naruto2:setPercentHitBox(1.6, 1.6)
+  naruto2:setPercentHitBox(4, 1.6)
   naruto2:setPlatformOrPhysic("platform") 
   naruto:setName("sask")
   naruto2:setGravity(10)
@@ -84,9 +84,9 @@ function love.update(dt)
     elseif naruto:getState() == "moving" then
       naruto:setCurrentAnimation(2)
     elseif naruto:getState() == "falling" then
-      naruto:setCurrentAnimation(3)
-    elseif naruto:getState() == "jumping" then
       naruto:setCurrentAnimation(4)
+    elseif naruto:getState() == "jumping" then
+      naruto:setCurrentAnimation(3)
     else
       naruto:setCurrentAnimation(1)
     end
@@ -98,6 +98,9 @@ function love.update(dt)
     end
     proj.x = proj.x + dt * 1200 * proj.dir    
   end
+
+  print(naruto:getCollisionType())
+  -- if naruto:getCollisionType() == then
 
   naruto:update(dt) -- atualiza a animação  
   naruto2:update(dt)
